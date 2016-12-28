@@ -8,7 +8,8 @@ RUN apk add --update \
 	openssh \
 	bash \
 	curl \
-	imagemagick &&\
+	imagemagick \
+	postgresql-client &&\
     curl -sSL -O https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz &&\
     tar zxf docker-${DOCKER_VERSION}.tgz -C / &&\
     ln -s /docker/docker /usr/bin/docker &&\
