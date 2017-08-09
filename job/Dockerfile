@@ -1,4 +1,4 @@
-FROM area51/node:latest
+FROM area51/node:4.4.7
 MAINTAINER Peter Mount <peter@retep.org>
 
 ENV DOCKER_VERSION 1.11.0
