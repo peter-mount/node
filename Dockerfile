@@ -63,6 +63,7 @@ RUN cd / &&\
     tar -cvf node.tar -T manifest
 
 # Now build the final image
+ARG ARCHITECTURE
 FROM ${ARCHITECTURE}/alpine
 MAINTAINER Peter Mount <peter@retep.org>
 
