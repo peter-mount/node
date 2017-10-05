@@ -16,9 +16,15 @@
 
 # The default arguments
 ARG ARCHITECTURE=amd64
-ARG VERSION=8.2.1
 
-FROM ${ARCHITECTURE}/alpine as builder
+# Current version as of Oct 5 2017
+ARG VERSION=8.6.0
+
+# ================================================================================
+# Setup the build environment
+# ================================================================================
+
+FROM ${ARCHITECTURE}/alpine as base
 
 ARG ARCHITECTURE
 ARG VERSION
@@ -36,6 +42,12 @@ RUN apk add --no-cache \
         paxctl \
         libgcc \
         libstdc++
+
+# ================================================================================
+# Now download and compile the sources
+# ================================================================================
+
+FROM base as builder
 
 # Download node sources
 RUN cd /tmp &&\
@@ -62,7 +74,10 @@ RUN cd / &&\
     grep symlinking ${FILE_LIST} | cut -f4 -d' ' >>manifest &&\
     tar -cvf node.tar -T manifest
 
+# ================================================================================
 # Now build the final image
+# ================================================================================
+
 ARG ARCHITECTURE
 FROM ${ARCHITECTURE}/alpine
 MAINTAINER Peter Mount <peter@retep.org>
