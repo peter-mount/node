@@ -25,9 +25,7 @@ ARG VERSION=8.6.0
 # ================================================================================
 
 FROM ${ARCHITECTURE}/alpine as base
-
 ARG ARCHITECTURE
-ARG VERSION
 
 ARG FILE_LIST=/file.list
 
@@ -48,6 +46,7 @@ RUN apk add --no-cache \
 # ================================================================================
 
 FROM base as builder
+ARG VERSION
 
 # Download node sources
 RUN cd /tmp &&\
