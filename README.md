@@ -60,7 +60,6 @@ e.g.
 
 This is the commands I use in the Jenkins builds (formatting just to make it easier to read here)
 
-    #docker build -t area51/arm64v8-node:8.2.1 --pull --force-rm=true arm64v8
     docker build \
       -t area51/amd64-node:8.2.1 \
       --pull \
