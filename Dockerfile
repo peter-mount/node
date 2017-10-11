@@ -27,8 +27,6 @@ ARG VERSION=8.6.0
 FROM ${ARCHITECTURE}/alpine as base
 ARG ARCHITECTURE
 
-ARG FILE_LIST=/file.list
-
 # Setup build environment
 RUN apk add --no-cache \
         curl \
@@ -48,6 +46,9 @@ RUN apk add --no-cache \
 FROM base as builder
 ARG VERSION
 
+# Where to store our file list
+ARG FILE_LIST=/file.list
+
 # Download node sources
 RUN cd /tmp &&\
     echo Downloading version ${VERSION} &&\
@@ -56,14 +57,25 @@ RUN cd /tmp &&\
     ls -l node.tar.gz && \
     tar -zxf node.tar.gz
 
-    # Build & install node, write install files to FILE_LIST
+# Configure
 RUN cd /tmp/node-v${VERSION} && \
     export GYP_DEFINES="linux_use_gold_flags=0" && \
-    ./configure --prefix=/usr ${CONFIG_FLAGS} && \
+    ./configure --prefix=/usr ${CONFIG_FLAGS}
+
+# Make mksnapshot
+RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make -j${NPROC} -C out mksnapshot BUILDTYPE=Release && \
-    paxctl -cm out/Release/mksnapshot && \
-    make -j${NPROC} && \
+    paxctl -cm out/Release/mksnapshot
+
+# Make
+RUN cd /tmp/node-v${VERSION} && \
+    NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
+    make -j${NPROC}
+
+# Install
+RUN cd /tmp/node-v${VERSION} && \
+    NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make install >${FILE_LIST} && \
     paxctl -cm /usr/bin/node
 
