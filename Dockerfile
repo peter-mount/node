@@ -17,8 +17,8 @@
 # The default arguments
 ARG ARCHITECTURE=amd64
 
-# Current version as of Oct 5 2017
-ARG VERSION=8.6.0
+# Current version as of Jan 4 2018
+ARG VERSION=8.9.4
 
 # ================================================================================
 # Setup the build environment
