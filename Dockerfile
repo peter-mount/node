@@ -18,28 +18,10 @@
 ARG VERSION=8.9.4
 
 # ================================================================================
-# Setup the build environment
-# ================================================================================
-
-FROM alpine as base
-
-# Setup build environment
-RUN apk add --no-cache \
-        curl \
-        make \
-        gcc \
-        g++ \
-        python \
-        linux-headers \
-        paxctl \
-        libgcc \
-        libstdc++
-
-# ================================================================================
 # Now download and compile the sources
 # ================================================================================
 
-FROM base as builder
+FROM area51/alpine-dev as builder
 ARG VERSION
 
 # Where to store our file list
