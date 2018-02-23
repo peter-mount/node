@@ -106,4 +106,29 @@ node( "AMD64" ) {
       sh 'docker manifest push -p ' + multiImage
     }
   }
+
+  // Publish latest as the current version
+  stage( 'Latest MultiArch' ) {
+    // Use the last one in the list
+    buildVersion = buildVersions[ -1 ]
+
+    // The manifest to publish
+    multiImage = dockerImage( '',  'latest' )
+
+    // Create/amend the manifest with our architectures
+    manifests = architectures.collect { architecture -> dockerImage( architecture,  buildVersion ) }
+    sh 'docker manifest create -a ' + multiImage + ' ' + manifests.join(' ')
+
+    // For each architecture annotate them to be correct
+    architectures.each {
+     architecture -> sh 'docker manifest annotate' +
+       ' --os linux' +
+       ' --arch ' + goarch( architecture ) +
+       ' ' + multiImage +
+       ' ' + dockerImage( architecture,  buildVersion )
+    }
+
+    // Publish the manifest
+    sh 'docker manifest push -p ' + multiImage
+  }
 }
