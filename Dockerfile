@@ -14,9 +14,6 @@
 # and add --squash to the build line.
 # =============================================================================
 
-# The default arguments
-ARG ARCHITECTURE=amd64
-
 # Current version as of Jan 4 2018
 ARG VERSION=8.9.4
 
@@ -24,8 +21,7 @@ ARG VERSION=8.9.4
 # Setup the build environment
 # ================================================================================
 
-FROM ${ARCHITECTURE}/alpine as base
-ARG ARCHITECTURE
+FROM alpine as base
 
 # Setup build environment
 RUN apk add --no-cache \
@@ -89,8 +85,7 @@ RUN cd / &&\
 # Now build the final image
 # ================================================================================
 
-ARG ARCHITECTURE
-FROM ${ARCHITECTURE}/alpine
+FROM alpine
 MAINTAINER Peter Mount <peter@retep.org>
 
 # Required libraries
