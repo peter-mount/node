@@ -72,12 +72,12 @@ architectures.each {
         sh 'docker pull alpine'
 
         sh 'docker build' +
-          ' -t ' + dockerImage( architecture,  ubuntuVersion ) +
+          ' -t ' + dockerImage( architecture,  buildVersion ) +
           ' --build-arg VERSION=' + buildVersion +
           ' --squash' +
           ' .'
 
-        sh 'docker push ' + dockerImage( architecture,  ubuntuVersion )
+        sh 'docker push ' + dockerImage( architecture,  buildVersion )
       }
     }
   }
