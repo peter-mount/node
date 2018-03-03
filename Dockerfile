@@ -36,24 +36,26 @@ RUN cd /tmp &&\
     tar -zxf node.tar.gz
 
 FROM download as configure
-
+ARG VERSION
 RUN cd /tmp/node-v${VERSION} && \
     export GYP_DEFINES="linux_use_gold_flags=0" && \
     ./configure --prefix=/usr ${CONFIG_FLAGS}
 
 FROM configure as mksnapshot
-
+ARG VERSION
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make -j${NPROC} -C out mksnapshot BUILDTYPE=Release && \
     paxctl -cm out/Release/mksnapshot
 
 FROM mksnapshot as make
+ARG VERSION
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make -j${NPROC}
 
 FROM make as install
+ARG VERSION
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make install >${FILE_LIST} && \
