@@ -75,12 +75,14 @@ def buildNode = {
       sh 'docker pull alpine'
     }
 
-    stage( 'Build ' + architecture ) {
-      sh 'docker build' +
-          ' -t ' + dockerImage( architecture,  buildVersion ) +
-          ' --build-arg VERSION=' + buildVersion +
-          ' --squash' +
-          ' .'
+    [ 'download', 'configure', 'mksnapshot', 'make', 'install', 'final' ].each {
+      target -> stage( target + ' ' + architecture ) {
+        sh 'docker build' +
+            ' -t ' + dockerImage( architecture,  buildVersion ) +
+            ' --build-arg VERSION=' + buildVersion +
+            ' --target ' + target +
+            ' .'
+      }
     }
 
     stage( 'Publish ' + architecture ) {

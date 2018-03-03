@@ -21,7 +21,7 @@ ARG VERSION=8.9.4
 # Now download and compile the sources
 # ================================================================================
 
-FROM area51/alpine-dev as builder
+FROM area51/alpine-dev as download
 ARG VERSION
 
 # Where to store our file list
@@ -35,23 +35,25 @@ RUN cd /tmp &&\
     ls -l node.tar.gz && \
     tar -zxf node.tar.gz
 
-# Configure
+FROM download as configure
+
 RUN cd /tmp/node-v${VERSION} && \
     export GYP_DEFINES="linux_use_gold_flags=0" && \
     ./configure --prefix=/usr ${CONFIG_FLAGS}
 
-# Make mksnapshot
+FROM configure as mksnapshot
+
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make -j${NPROC} -C out mksnapshot BUILDTYPE=Release && \
     paxctl -cm out/Release/mksnapshot
 
-# Make
+FROM mksnapshot as make
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make -j${NPROC}
 
-# Install
+FROM make as install
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make install >${FILE_LIST} && \
@@ -67,7 +69,7 @@ RUN cd / &&\
 # Now build the final image
 # ================================================================================
 
-FROM alpine
+FROM alpine as final
 MAINTAINER Peter Mount <peter@retep.org>
 
 # Required libraries
