@@ -14,7 +14,13 @@ if( version == 'master' ) {
 architectures = [ 'amd64', 'arm64v8' ]
 
 // The node versions to build
-buildVersions = [ '8.9.4' ]
+buildVersions = [ '8.9.4', '9.7.1' ]
+
+// latestVersion is the latest stable LTS version
+latestVersion = '8.9.4'
+
+// Current version is the current stable non-LTS version
+currentVersion = '9.7.1'
 
 // The slave label based on architecture
 def slaveId = {
@@ -61,6 +67,7 @@ properties( [
   ])
 ])
 
+// Build the images for each architecture
 def buildNode = {
   architecture, buildVersion -> node( slaveId( architecture ) ) {
     stage( "Prepare " + architecture ) {
@@ -82,24 +89,12 @@ def buildNode = {
   }
 }
 
-buildVersions.each {
-  buildVersion -> stage( buildVersion ) {
-    parallel(
-      'amd64': {
-        buildNode( 'amd64', buildVersion )
-      },
-      'arm64v8': {
-        buildNode( 'arm64v8', buildVersion )
-      }
-    )
-  }
-}
-
-node( "AMD64" ) {
-   buildVersions.each {
-     buildVersion ->  stage( buildVersion + ' MultiArch' ) {
+// Generate the multi-arch image
+def buildMultiArch = {
+  buildVersion, tag -> node( "AMD64" ) {
+    stage( tag + ' MultiArch' ) {
       // The manifest to publish
-      multiImage = dockerImage( '',  buildVersion )
+      multiImage = dockerImage( '', tag )
 
       // Create/amend the manifest with our architectures
       manifests = architectures.collect { architecture -> dockerImage( architecture,  buildVersion ) }
@@ -118,29 +113,24 @@ node( "AMD64" ) {
       sh 'docker manifest push -p ' + multiImage
     }
   }
+}
 
-  // Publish latest as the current version
-  stage( 'Latest MultiArch' ) {
-    // Use the last one in the list
-    buildVersion = buildVersions[ -1 ]
-
-    // The manifest to publish
-    multiImage = dockerImage( '',  'latest' )
-
-    // Create/amend the manifest with our architectures
-    manifests = architectures.collect { architecture -> dockerImage( architecture,  buildVersion ) }
-    sh 'docker manifest create -a ' + multiImage + ' ' + manifests.join(' ')
-
-    // For each architecture annotate them to be correct
-    architectures.each {
-     architecture -> sh 'docker manifest annotate' +
-       ' --os linux' +
-       ' --arch ' + goarch( architecture ) +
-       ' ' + multiImage +
-       ' ' + dockerImage( architecture,  buildVersion )
+buildVersions.each {
+  buildVersion ->
+    stage( buildVersion ) {
+      parallel(
+        'amd64': {
+          buildNode( 'amd64', buildVersion )
+        },
+        'arm64v8': {
+          buildNode( 'arm64v8', buildVersion )
+        }
+      )
     }
 
-    // Publish the manifest
-    sh 'docker manifest push -p ' + multiImage
-  }
+    buildMultiArch( buildVersion, buildVersion )
 }
+
+// Now the latest (LTS) and current (non-LTS) images
+buildMultiArch( latestVersion, 'latest' )
+buildMultiArch( currentVersion, 'current' )
