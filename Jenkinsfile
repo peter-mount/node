@@ -61,31 +61,39 @@ properties( [
   ])
 ])
 
-architectures.each {
-  architecture -> node( slaveId( architecture ) ) {
-    stage( "Checkout " + architecture ) {
+def buildNode = {
+  architecture, buildVersion -> node( slaveId( architecture ) ) {
+    stage( "Prepare " + architecture ) {
       checkout scm
+      sh 'docker pull alpine'
     }
 
-     buildVersions.each {
-       buildVersion -> stage( buildVersion + ' ' + architecture ) {
-        sh 'docker pull alpine'
-
-        sh 'docker build' +
+    stage( 'Build ' + architecture ) {
+      sh 'docker build' +
           ' -t ' + dockerImage( architecture,  buildVersion ) +
           ' --build-arg VERSION=' + buildVersion +
           ' --squash' +
           ' .'
+    }
 
-        sh 'docker push ' + dockerImage( architecture,  buildVersion )
-      }
+    stage( 'Publish ' + architecture ) {
+      sh 'docker push ' + dockerImage( architecture,  buildVersion )
     }
   }
 }
 
+parallel(
+  'amd64': {
+    buildNode( 'amd64', buildVersion )
+  },
+  'arm64v8': {
+    buildNode( 'arm64v8', buildVersion )
+  }
+)
+
 node( "AMD64" ) {
    buildVersions.each {
-     buildVersion ->  stage( buildVersion + 'MultiArch' ) {
+     buildVersion ->  stage( buildVersion + ' MultiArch' ) {
       // The manifest to publish
       multiImage = dockerImage( '',  buildVersion )
 
