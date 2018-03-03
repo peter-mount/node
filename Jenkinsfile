@@ -83,14 +83,16 @@ def buildNode = {
 }
 
 buildVersions.each {
-  buildVersion -> parallel(
-    'amd64': {
-      buildNode( 'amd64', buildVersion )
-    },
-    'arm64v8': {
-      buildNode( 'arm64v8', buildVersion )
-    }
-  )
+  buildVersion -> stage( buildVersion ) {
+    parallel(
+      'amd64': {
+        buildNode( 'amd64', buildVersion )
+      },
+      'arm64v8': {
+        buildNode( 'arm64v8', buildVersion )
+      }
+    )
+  }
 }
 
 node( "AMD64" ) {
