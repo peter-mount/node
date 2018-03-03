@@ -129,8 +129,9 @@ buildVersions.each {
     }
 
     buildMultiArch( buildVersion, buildVersion )
-}
 
-// Now the latest (LTS) and current (non-LTS) images
-buildMultiArch( latestVersion, 'latest' )
-buildMultiArch( currentVersion, 'current' )
+    // Now the latest (LTS) and current (non-LTS) images
+    if( buildVersion == latestVersion || buildVersion == currentVersion ) {
+      buildMultiArch( buildVersion, buildVersion == latestVersion ? 'latest' : 'current' )
+    }
+}
