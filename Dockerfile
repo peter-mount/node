@@ -72,6 +72,8 @@ MAINTAINER Peter Mount <peter@retep.org>
 
 # Required libraries
 RUN apk add --no-cache \
+      curl \
+      git \
       libgcc \
       libstdc++
 
