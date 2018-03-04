@@ -24,9 +24,6 @@ ARG VERSION=8.9.4
 FROM area51/alpine-dev as download
 ARG VERSION
 
-# Where to store our file list
-ARG FILE_LIST=/file.list
-
 # Download node sources
 RUN cd /tmp &&\
     echo Downloading version ${VERSION} &&\
@@ -56,6 +53,10 @@ RUN cd /tmp/node-v${VERSION} && \
 
 FROM make as install
 ARG VERSION
+
+# Where to store our file list
+ARG FILE_LIST=/file.list
+
 RUN cd /tmp/node-v${VERSION} && \
     NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
     make install >${FILE_LIST} && \
