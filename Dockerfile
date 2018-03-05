@@ -82,6 +82,6 @@ RUN apk add --no-cache \
       libgcc \
       libstdc++
 
-COPY --from=builder /node.tar /tmp/node.tar
+COPY --from=install /node.tar /tmp/node.tar
 RUN tar xvf /tmp/node.tar &&\
     rm -rf /tmp/*
