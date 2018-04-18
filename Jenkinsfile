@@ -13,14 +13,14 @@ if( version == 'master' ) {
 // The architectures to build, in format recognised by docker
 architectures = [ 'amd64', 'arm64v8' ]
 
-// The node versions to build
-buildVersions = [ '8.9.4', '9.7.1' ]
-
 // latestVersion is the latest stable LTS version
-latestVersion = '8.9.4'
+latestVersion = '8.11.1'
 
 // Current version is the current stable non-LTS version
-currentVersion = '9.7.1'
+currentVersion = '9.11.1'
+
+// The node versions to build
+buildVersions = [ latestVersion, currentVersion ]
 
 // The slave label based on architecture
 def slaveId = {
