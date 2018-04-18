@@ -64,6 +64,7 @@ properties( [
   disableResume(),
   pipelineTriggers([
     upstream('/peter-mount/alpine/master'),
+    cron('H H * * *'),
   ])
 ])
 
