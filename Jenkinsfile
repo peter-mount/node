@@ -14,13 +14,13 @@ if( version == 'master' ) {
 architectures = [ 'amd64', 'arm64v8' ]
 
 // latestVersion is the latest stable LTS version
-latestVersion = '8.11.1'
+latestVersion = '8.11.3'
 
 // Current version is the current stable non-LTS version
-currentVersion = '9.11.1'
+currentVersion = '10.8.0'
 
 // The node versions to build
-buildVersions = [ latestVersion, currentVersion ]
+buildVersions = [ latestVersion, currentVersion, '9.11.2', '9.11.1' ]
 
 // The slave label based on architecture
 def slaveId = {
